@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorPrimary"
+    tools:context="io.smartplanapp.smartclock.ClockActivity">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:orientation="horizontal"
+        android:layout_centerHorizontal="true">
+
+        <AnalogClock
+            android:layout_width="72dp"
+            android:layout_height="72dp" />
+
+        <TextClock
+            android:layout_width="wrap_content"
+            android:layout_height="72dp"
+            android:textColor="@android:color/white"
+            style="@style/txtShadow"
+            android:format24Hour="HH:mm:ss"
+            android:paddingLeft="10dp"
+            android:textSize="50sp"
+            android:textStyle="bold"
+            android:id="@+id/timeClock" />
+
+    </LinearLayout>
+
+    <TextClock
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="20dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="32sp"
+        android:format24Hour="dd. MMMM yyyy"
+        android:id="@+id/dateClock"/>
+
+    <Chronometer
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="142dp"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:id="@+id/chronometer" />
+
+    <ImageView
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_below="@+id/chronometer"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="160dp"
+        android:src="@drawable/button_up"
+        android:id="@+id/imgButton" />
+
+</LinearLayout>
