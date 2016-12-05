@@ -39,118 +39,78 @@ import com.google.android.gms.nearby.messages.SubscribeOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+public class MainActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final int PERMISSIONS_REQUEST_CODE = 1111;
-
+    // Constant used for the permission workflow for Nearby
+    private static final int FINE_LOCATION_REQUEST_CODE = 123;
     private static final String KEY_SUBSCRIBED = "subscribed";
 
-    /**
-     * The entry point to Google Play Services.
-     */
-    private GoogleApiClient mGoogleApiClient;
+    private GoogleApiClient googleApiClient;
 
-    /**
-     * The container {@link android.view.ViewGroup} for the minimal UI associated with this sample.
-     */
-    private RelativeLayout mContainer;
+    // Holds a reference to the View which will display messages from beacons
+    private RelativeLayout container;
 
     /**
      * Tracks subscription state. Set to true when a call to
      * {@link Messages#subscribe(GoogleApiClient, MessageListener)} succeeds.
      */
-    private boolean mSubscribed = false;
+    private boolean subscribed = false;
 
     /**
      * Adapter for working with messages from nearby beacons.
      */
-    private ArrayAdapter<String> mNearbyMessagesArrayAdapter;
+    private ArrayAdapter<String> nearbyMessagesArrayAdapter;
 
     /**
-     * Backing data structure for {@code mNearbyMessagesArrayAdapter}.
+     * Backing data structure for {@code nearbyMessagesArrayAdapter}.
      */
-    private List<String> mNearbyMessagesList = new ArrayList<>();
+    private List<String> nearbyMessagesList = new ArrayList<>();
 
+    // ---------------------------------------------------------------------------------------
+    // ACTIVITY LIFECYCLE METHODS
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         if (savedInstanceState != null) {
-            mSubscribed = savedInstanceState.getBoolean(KEY_SUBSCRIBED, false);
+            subscribed = savedInstanceState.getBoolean(KEY_SUBSCRIBED, false);
         }
 
-        mContainer = (RelativeLayout) findViewById(R.id.main_activity_container);
+        container = (RelativeLayout) findViewById(R.id.main_activity_container);
 
-        if (!havePermissions()) {
-            Log.i(TAG, "Requesting permissions needed for this app.");
-            requestPermissions();
+        // Request permission to access fine location if not already granted
+        if (!havePermission()) {
+            Log.i(TAG, "Requesting access to fine location needed for this app.");
+            requestPermission();
         }
 
         final List<String> cachedMessages = Utils.getCachedMessages(this);
         if (cachedMessages != null) {
-            mNearbyMessagesList.addAll(cachedMessages);
+            nearbyMessagesList.addAll(cachedMessages);
         }
 
-        final ListView nearbyMessagesListView = (ListView) findViewById(
-                R.id.nearby_messages_list_view);
-        mNearbyMessagesArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1,
-                mNearbyMessagesList);
+        final ListView nearbyMessagesListView = (ListView) findViewById(R.id.nearby_messages_list_view);
+        nearbyMessagesArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, nearbyMessagesList);
         if (nearbyMessagesListView != null) {
-            nearbyMessagesListView.setAdapter(mNearbyMessagesArrayAdapter);
+            nearbyMessagesListView.setAdapter(nearbyMessagesArrayAdapter);
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         getSharedPreferences(getApplicationContext().getPackageName(), Context.MODE_PRIVATE)
                 .registerOnSharedPreferenceChangeListener(this);
-
-        if (havePermissions()) {
+        if (havePermission()) {
             buildGoogleApiClient();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode != PERMISSIONS_REQUEST_CODE) {
-            return;
-        }
-        for (int i = 0; i < permissions.length; i++) {
-            String permission = permissions[i];
-            if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
-                if (shouldShowRequestPermissionRationale(permission)) {
-                    Log.i(TAG, "Permission denied without 'NEVER ASK AGAIN': " + permission);
-                    showRequestPermissionsSnackbar();
-                } else {
-                    Log.i(TAG, "Permission denied with 'NEVER ASK AGAIN': " + permission);
-                    showLinkToSettingsSnackbar();
-                }
-            } else {
-                Log.i(TAG, "Permission granted, building GoogleApiClient");
-                buildGoogleApiClient();
-            }
-        }
-    }
-
-    private synchronized void buildGoogleApiClient() {
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(Nearby.MESSAGES_API, new MessagesOptions.Builder()
-                            .setPermissions(NearbyPermissions.BLE).build())
-                    .addConnectionCallbacks(this)
-                    .enableAutoManage(this, this)
-                    .build();
         }
     }
 
@@ -162,17 +122,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        if (mContainer != null) {
-            Snackbar.make(mContainer, "Exception while connecting to Google Play services: " +
-                            connectionResult.getErrorMessage(),
-                    Snackbar.LENGTH_INDEFINITE).show();
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_SUBSCRIBED, subscribed);
+    }
+    // ---------------------------------------------------------------------------------------
+    // CALLBACK METHOD FROM LISTENER INTERFACE
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (TextUtils.equals(key, Utils.KEY_CACHED_MESSAGES)) {
+            nearbyMessagesList.clear();
+            nearbyMessagesList.addAll(Utils.getCachedMessages(this));
+            nearbyMessagesArrayAdapter.notifyDataSetChanged();
         }
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.w(TAG, "Connection suspended. Error code: " + i);
+    // ---------------------------------------------------------------------------------------
+    // GOOGLE API CLIENT BUILDER AND CONNECTION CALLBACKS
+    private synchronized void buildGoogleApiClient() {
+        if (googleApiClient == null) {
+            googleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Nearby.MESSAGES_API, new MessagesOptions.Builder()
+                            .setPermissions(NearbyPermissions.BLE).build())
+                    .addConnectionCallbacks(this)
+                    .enableAutoManage(this, this)
+                    .build();
+        }
     }
 
     @Override
@@ -181,30 +156,96 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         subscribe();
     }
 
+    //  Logs the error code for the suspended GoogleApiClient connection
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (TextUtils.equals(key, Utils.KEY_CACHED_MESSAGES)) {
-            mNearbyMessagesList.clear();
-            mNearbyMessagesList.addAll(Utils.getCachedMessages(this));
-            mNearbyMessagesArrayAdapter.notifyDataSetChanged();
+    public void onConnectionSuspended(int i) {
+        Log.w(TAG, "Connection suspended. Error code: " + i);
+    }
+
+    // Displays a Snackbar notifying the user that the connection to GoogleApiClient has failed
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        if (container != null) {
+            Snackbar.make(container, "Exception while connecting to Google Play services: " +
+                            connectionResult.getErrorMessage(),
+                    Snackbar.LENGTH_INDEFINITE).show();
         }
     }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(KEY_SUBSCRIBED, mSubscribed);
-    }
-
-    private boolean havePermissions() {
+    // ---------------------------------------------------------------------------------------
+    // METHODS USED IN THE LOCATION PERMISSION WORKFLOW
+    // Checks whether the app has permission to access fine location
+    private boolean havePermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void requestPermissions() {
+    // Requests permission to access fine location
+    private void requestPermission() {
         ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_CODE);
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_REQUEST_CODE);
     }
+
+    // Displays a Snackbar giving the user a chance to re-initiate the permission workflow
+    private void showRequestPermissionSnackbar() {
+        if (container != null) {
+            Snackbar.make(container, R.string.permission_needed,
+                    Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.understood, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            requestPermission();
+                        }
+                    }).show();
+        }
+    }
+
+    // Displays a Snackbar with a link to Settings if permission was not granted
+    private void showLinkToSettingsSnackbar() {
+        if (container == null) {
+            return;
+        }
+        Snackbar.make(container,
+                R.string.permission_settings,
+                Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.string.settings, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        // Build intent that displays the App settings screen.
+                        Intent intent = new Intent();
+                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package",
+                                BuildConfig.APPLICATION_ID, null);
+                        intent.setData(uri);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                    }
+                }).show();
+    }
+
+    // Handles the permission workflow in response to user interaction
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == FINE_LOCATION_REQUEST_CODE) {
+            for (int i = 0; i < permissions.length; i++) {
+                String permission = permissions[i];
+                if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                    if (shouldShowRequestPermissionRationale(permission)) {
+                        // Access fine location permission denied
+                        showRequestPermissionSnackbar();
+                    } else {
+                        // Access fine location permission denied, selected >Never ask again<
+                        showLinkToSettingsSnackbar();
+                    }
+                } else {
+                    // Permission granted
+                    buildGoogleApiClient();
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------
 
     /**
      * Calls {@link Messages#subscribe(GoogleApiClient, MessageListener, SubscribeOptions)},
@@ -214,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void subscribe() {
         // In this sample, we subscribe when the activity is launched, but not on device orientation
         // change.
-        if (mSubscribed) {
+        if (subscribed) {
             Log.i(TAG, "Already subscribed.");
             return;
         }
@@ -223,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .setStrategy(Strategy.BLE_ONLY)
                 .build();
 
-        Nearby.Messages.subscribe(mGoogleApiClient, getPendingIntent(), options)
+        Nearby.Messages.subscribe(googleApiClient, getPendingIntent(), options)
                 .setResultCallback(new ResultCallback<Status>() {
                     @Override
                     public void onResult(@NonNull Status status) {
@@ -248,49 +289,4 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return new Intent(this, BackgroundSubscribeIntentService.class);
     }
 
-    /**
-     * Displays {@link Snackbar} instructing user to visit Settings to grant permissions required by
-     * this application.
-     */
-    private void showLinkToSettingsSnackbar() {
-        if (mContainer == null) {
-            return;
-        }
-        Snackbar.make(mContainer,
-                R.string.permission_denied_explanation,
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.settings, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        // Build intent that displays the App settings screen.
-                        Intent intent = new Intent();
-                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        Uri uri = Uri.fromParts("package",
-                                BuildConfig.APPLICATION_ID, null);
-                        intent.setData(uri);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
-                }).show();
-    }
-
-    /**
-     * Displays {@link Snackbar} with button for the user to re-initiate the permission workflow.
-     */
-    private void showRequestPermissionsSnackbar() {
-        if (mContainer == null) {
-            return;
-        }
-        Snackbar.make(mContainer, R.string.permission_rationale,
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction(R.string.ok, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        // Request permission.
-                        ActivityCompat.requestPermissions(MainActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                PERMISSIONS_REQUEST_CODE);
-                    }
-                }).show();
-    }
 }

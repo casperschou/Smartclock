@@ -4,8 +4,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    <uses-feature android:name="android.hardware." />
+
     <application
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -15,7 +16,7 @@
             android:value="AIzaSyBFtrH3uy2RPn49KBMeom2LpbZJ1tQ_RoA" />
 
         <activity
-            android:name="io.smartplanapp.smartclock.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -26,9 +27,11 @@
         </activity>
 
         <service
-            android:name="io.smartplanapp.smartclock.BackgroundSubscribeIntentService"
+            android:name=".BackgroundSubscribeIntentService"
             android:exported="false" />
 
+        <activity android:name=".ClockActivity"></activity>
+        <activity android:name=".LoginActivity"></activity>
     </application>
 
 </manifest>

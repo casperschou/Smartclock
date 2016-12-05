@@ -15,7 +15,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+// Utility methods used to display data scanned from beacons.
 public final class Utils {
+
     static final String KEY_CACHED_MESSAGES = "cached-messages";
 
     /**
@@ -69,7 +71,7 @@ public final class Utils {
     }
 
     /**
-     * Gets the SharedPReferences object that is used for persisting data in this application.
+     * Gets the SharedPreferences object that is used for persisting data in this application.
      *
      * @param context The context.
      * @return The single {@link SharedPreferences} instance that can be used to retrieve and modify

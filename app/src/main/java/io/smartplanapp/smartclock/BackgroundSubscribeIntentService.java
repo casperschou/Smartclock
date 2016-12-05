@@ -14,20 +14,21 @@ import com.google.android.gms.nearby.messages.MessageListener;
 
 import java.util.List;
 
-
+// IntentService that handles messages delivered by Nearby Messages API to the app.
 /**
  * While subscribed in the background, this service shows a persistent notification with the
  * current set of messages from nearby beacons. Nearby launches this service when a message is
  * found or lost, and this service updates the notification, then stops itself.
  */
 public class BackgroundSubscribeIntentService extends IntentService {
-    private static final String TAG = "BackSubIntentService";
+
+    private static final String TAG = "BackgroundSubscribeIntentService";
 
     private static final int MESSAGES_NOTIFICATION_ID = 1;
     private static final int NUM_MESSAGES_IN_NOTIFICATION = 5;
 
     public BackgroundSubscribeIntentService() {
-        super("BackgroundSubscribeIntentService");
+        super(TAG);
     }
 
     @Override
@@ -83,9 +84,9 @@ public class BackgroundSubscribeIntentService extends IntentService {
             case 0:
                 return getResources().getString(R.string.scanning);
             case 1:
-                return getResources().getString(R.string.one_message);
+                return getResources().getString(R.string.found_message);
             default:
-                return getResources().getString(R.string.many_messages, messages.size());
+                return getResources().getString(R.string.found_messages, messages.size());
         }
     }
 
