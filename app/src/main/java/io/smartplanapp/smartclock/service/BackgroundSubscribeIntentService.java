@@ -1,4 +1,4 @@
-package io.smartplanapp.smartclock;
+package io.smartplanapp.smartclock.service;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -7,12 +7,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.nearby.messages.MessageListener;
 
 import java.util.List;
+
+import io.smartplanapp.smartclock.MainActivity;
+import io.smartplanapp.smartclock.R;
+import io.smartplanapp.smartclock.ShiftsLogActivity;
 
 // IntentService that handles messages delivered by Nearby Messages API to the app.
 /**
@@ -22,13 +27,11 @@ import java.util.List;
  */
 public class BackgroundSubscribeIntentService extends IntentService {
 
-    private static final String TAG = "BackgroundSubscribeIntentService";
-
     private static final int MESSAGES_NOTIFICATION_ID = 1;
     private static final int NUM_MESSAGES_IN_NOTIFICATION = 5;
 
     public BackgroundSubscribeIntentService() {
-        super(TAG);
+        super("BackgroundSubscribeIntentService");
     }
 
     @Override
@@ -45,12 +48,14 @@ public class BackgroundSubscribeIntentService extends IntentService {
                 public void onFound(Message message) {
                     Utils.saveFoundMessage(getApplicationContext(), message);
                     updateNotification();
+                    Log.i(">>>", "Fandt den her besked: " + message.toString());
                 }
 
                 @Override
                 public void onLost(Message message) {
                     Utils.removeLostMessage(getApplicationContext(), message);
                     updateNotification();
+                    Log.i(">>>", "Fandt ikke den her besked: " + message.toString());
                 }
             });
         }

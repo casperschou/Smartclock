@@ -18,9 +18,15 @@
     <string name="found_messages">Fandt %1$d indstemplingsmuligheder</string>
 
     <string name="wrong_credentials">Forkert brugernavn eller password</string>
-    <string name="admin">admin</string>
+
     <string name="username">Brugernavn</string>
+
     <string name="password">Kodeord</string>
+
     <string name="login">Log ind</string>
+
+    <string name="filter">Filter</string>
+
+    <string name="date_placeholder">Indtast dato</string>
 
 </resources>

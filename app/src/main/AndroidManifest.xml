@@ -4,7 +4,9 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <uses-feature android:name="android.hardware." />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="true" />
 
     <application
         android:icon="@mipmap/ic_launcher"
@@ -27,11 +29,13 @@
         </activity>
 
         <service
-            android:name=".BackgroundSubscribeIntentService"
+            android:name=".service.BackgroundSubscribeIntentService"
             android:exported="false" />
 
-        <activity android:name=".ClockActivity"></activity>
-        <activity android:name=".LoginActivity"></activity>
+        <activity android:name=".ClockActivity" />
+        <activity android:name=".LoginActivity"
+            android:windowSoftInputMode="stateVisible" />
+        <activity android:name=".ShiftsLogActivity"></activity>
     </application>
 
 </manifest>

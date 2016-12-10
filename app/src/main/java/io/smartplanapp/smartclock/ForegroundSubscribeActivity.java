@@ -47,7 +47,7 @@ import java.util.List;
 import io.smartplanapp.smartclock.service.BackgroundSubscribeIntentService;
 import io.smartplanapp.smartclock.service.Utils;
 
-public class MainActivity extends AppCompatActivity implements
+public class ForegroundSubscribeActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         SharedPreferences.OnSharedPreferenceChangeListener {

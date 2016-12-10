@@ -1,4 +1,4 @@
-package io.smartplanapp.smartclock;
+package io.smartplanapp.smartclock.service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -18,7 +18,7 @@ import java.util.Set;
 // Utility methods used to display data scanned from beacons.
 public final class Utils {
 
-    static final String KEY_CACHED_MESSAGES = "cached-messages";
+    public static final String KEY_CACHED_MESSAGES = "cached-messages";
 
     /**
      * Fetches message strings stored in {@link SharedPreferences}.
@@ -26,7 +26,7 @@ public final class Utils {
      * @param context The context.
      * @return  A list (possibly empty) containing message strings.
      */
-    static List<String> getCachedMessages(Context context) {
+    public static List<String> getCachedMessages(Context context) {
         SharedPreferences sharedPrefs = getSharedPreferences(context);
         String cachedMessagesJson = sharedPrefs.getString(KEY_CACHED_MESSAGES, "");
         if (TextUtils.isEmpty(cachedMessagesJson)) {
@@ -43,7 +43,7 @@ public final class Utils {
      * @param context The context.
      * @param message The Message whose payload (as string) is saved to SharedPreferences.
      */
-    static void saveFoundMessage(Context context, Message message) {
+    public static void saveFoundMessage(Context context, Message message) {
         ArrayList<String> cachedMessages = new ArrayList<>(getCachedMessages(context));
         Set<String> cachedMessagesSet = new HashSet<>(cachedMessages);
         String messageString = new String(message.getContent());
@@ -61,7 +61,7 @@ public final class Utils {
      * @param context The context.
      * @param message The Message whose payload (as string) is removed from SharedPreferences.
      */
-    static void removeLostMessage(Context context, Message message) {
+    public static void removeLostMessage(Context context, Message message) {
         ArrayList<String> cachedMessages = new ArrayList<>(getCachedMessages(context));
         cachedMessages.remove(new String(message.getContent()));
         getSharedPreferences(context)
@@ -77,9 +77,10 @@ public final class Utils {
      * @return The single {@link SharedPreferences} instance that can be used to retrieve and modify
      *         values.
      */
-    static SharedPreferences getSharedPreferences(Context context) {
+    public static SharedPreferences getSharedPreferences(Context context) {
         return context.getSharedPreferences(
                 context.getApplicationContext().getPackageName(),
                 Context.MODE_PRIVATE);
     }
+
 }
