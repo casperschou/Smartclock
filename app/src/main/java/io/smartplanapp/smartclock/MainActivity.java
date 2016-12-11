@@ -1,12 +1,9 @@
 package io.smartplanapp.smartclock;
 
 import android.Manifest;
-import android.app.PendingIntent;
-import android.content.Context;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -17,26 +14,25 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.nearby.Nearby;
+import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.nearby.messages.MessageListener;
-import com.google.android.gms.nearby.messages.Messages;
 import com.google.android.gms.nearby.messages.MessagesOptions;
-import com.google.android.gms.nearby.messages.NearbyMessagesStatusCodes;
 import com.google.android.gms.nearby.messages.NearbyPermissions;
 import com.google.android.gms.nearby.messages.Strategy;
 import com.google.android.gms.nearby.messages.SubscribeOptions;
@@ -44,118 +40,134 @@ import com.google.android.gms.nearby.messages.SubscribeOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.smartplanapp.smartclock.service.BackgroundSubscribeIntentService;
-import io.smartplanapp.smartclock.service.Utils;
-
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        GoogleApiClient.OnConnectionFailedListener {
 
-    // Constant used for the permission workflow for Nearby
-    private static final int FINE_LOCATION_REQUEST_CODE = 123;
-    private static final String KEY_SUBSCRIBED = "subscribed";
+    public static final String EXTRA_LOCATION = "location";
 
+    // GUI elements
+    private FrameLayout baseLayout;
+    private ImageView imgNearby;
+    private TextView apiStatus;
+    private TextView messagesHeader;
+
+    // Nearby Messages API
+    private static final int REQUEST_CODE_FINE_LOCATION = 123;
     private GoogleApiClient googleApiClient;
+    private MessageListener messageListener;
+    private List<String> messagesList = new ArrayList<>();
+    private ArrayAdapter<String> messagesArrayAdapter;
+    private boolean subscribing;
 
-    // Holds a reference to the View which will display messages from beacons
-    private FrameLayout container;
-
-    /**
-     * Tracks subscription state. Set to true when a call to
-     * {@link Messages#subscribe(GoogleApiClient, MessageListener)} succeeds.
-     */
-    private boolean subscribed = false;
-
-    /**
-     * Adapter for working with messages from nearby beacons.
-     */
-    private ArrayAdapter<String> nearbyMessagesArrayAdapter;
-
-    /**
-     * Backing data structure for {@code nearbyMessagesArrayAdapter}.
-     */
-    private List<String> nearbyMessagesList = new ArrayList<>();
-
-    // ---------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     // ACTIVITY LIFECYCLE METHODS
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Initialize GUI elements
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        baseLayout = (FrameLayout) findViewById(R.id.list_view_container);
+        imgNearby = (ImageView)findViewById(R.id.img_nearby);
+        imgNearby.setVisibility(View.GONE); // Display only when scanning for messages
+        apiStatus = (TextView) findViewById(R.id.txt_api_status);
+        messagesHeader = (TextView) findViewById(R.id.txt_msg_header);
 
-        if (savedInstanceState != null) {
-            subscribed = savedInstanceState.getBoolean(KEY_SUBSCRIBED, false);
-        }
-
-        container = (FrameLayout) findViewById(R.id.list_view_container);
-
-        // Request permission to access fine location if not already granted
-        if (!havePermission()) {
-            Log.i(">>>", "Requesting access to fine location needed for this app.");
-            requestPermission();
-        }
-
-        // Load cached messages from Utility class
-        final List<String> cachedMessages = Utils.getCachedMessages(this);
-        if (cachedMessages != null) {
-            nearbyMessagesList.addAll(cachedMessages);
-        }
-
-        final ListView nearbyMessagesListView = (ListView) findViewById(R.id.nearby_messages_list_view);
-        nearbyMessagesArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, nearbyMessagesList);
-        if (nearbyMessagesListView != null) {
-            nearbyMessagesListView.setAdapter(nearbyMessagesArrayAdapter);
-        }
-
-        nearbyMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        // ArrayAdapter and ListView for Nearby Messages
+        messagesArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messagesList);
+        final ListView messagesListView = (ListView) findViewById(R.id.list_view_messages);
+        messagesListView.setAdapter(messagesArrayAdapter);
+        messagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listView, View view,
                                     int position, long id) {
-                Toast.makeText(getApplicationContext(),
-                        listView.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+//                Intent intent = new Intent(MainActivity.this, ClockActivity.class);
+//                intent.putExtra(EXTRA_LOCATION, listView.getItemAtPosition(position).toString());
+//                startActivity(intent);
+                Snackbar.make(baseLayout, listView.getItemAtPosition(position).toString(),
+                        Snackbar.LENGTH_INDEFINITE).show();
             }
         });
+
+        // Permission to access fine location
+        if (!havePermission()) {
+            apiStatus.setText(R.string.permission_missing);
+            requestPermission();
+        }
+
+        initMessageListener();
     }
 
+    // Reset list of message results, so locations can not be used outside of range
+    @Override
+    protected void onStart() {
+        super.onStart();
+        messagesList.clear();
+        messagesArrayAdapter.notifyDataSetChanged();
+        messagesHeader.setText(R.string.found_zero);
+    }
+
+    // Check if Bluetooth or fine location access have been disabled
     @Override
     protected void onResume() {
         super.onResume();
-        getSharedPreferences(getApplicationContext().getPackageName(), Context.MODE_PRIVATE)
-                .registerOnSharedPreferenceChangeListener(this);
+        if (!isBluetoothAvailable()) {
+            apiStatus.setText(getString(R.string.error_bluetooth));
+            messagesHeader.setText(R.string.error_bluetooth_rationale);
+            return;
+        }
         if (havePermission()) {
             buildGoogleApiClient();
         }
     }
 
+
+
+    // Unsubscribe with every pause, since active foreground scanning is battery consuming
     @Override
     protected void onPause() {
-        getSharedPreferences(getApplicationContext().getPackageName(), Context.MODE_PRIVATE)
-                .unregisterOnSharedPreferenceChangeListener(this);
+        if (subscribing) {
+            unsubscribe();
+        }
+        googleApiClient = null;
         super.onPause();
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(KEY_SUBSCRIBED, subscribed);
-    }
-    // ---------------------------------------------------------------------------------------
-    // CALLBACK METHOD FROM LISTENER INTERFACE
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (TextUtils.equals(key, Utils.KEY_CACHED_MESSAGES)) {
-            nearbyMessagesList.clear();
-            nearbyMessagesList.addAll(Utils.getCachedMessages(this));
-            nearbyMessagesArrayAdapter.notifyDataSetChanged();
-        }
+    // --------------------------------------------------------------------------------------------
+    // MESSAGE LISTENER FOR NEARBY MESSAGES
+
+    private void initMessageListener() {
+        messageListener = new MessageListener() {
+
+            @Override
+            public void onFound(Message message) {
+                String msgContent = new String(message.getContent());
+                messagesList.add(msgContent);
+                messagesArrayAdapter.notifyDataSetChanged();
+                updateMessagesHeader();
+            }
+
+            @Override
+            public void onLost(Message message) {
+                String msgContent = new String(message.getContent());
+                messagesList.remove(msgContent);
+                messagesArrayAdapter.notifyDataSetChanged();
+                updateMessagesHeader();
+                Snackbar.make(baseLayout, getString(R.string.scan_result_lost) + msgContent,
+                        Snackbar.LENGTH_LONG).show();
+            }
+        };
     }
 
-    // ---------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
     // GOOGLE API CLIENT BUILDER AND CONNECTION CALLBACKS
+
     private synchronized void buildGoogleApiClient() {
+        apiStatus.setText(R.string.connecting);
         if (googleApiClient == null) {
             googleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(Nearby.MESSAGES_API, new MessagesOptions.Builder()
@@ -168,27 +180,63 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.i(">>>", "GoogleApiClient connected");
+        apiStatus.setText(R.string.connected);
         subscribe();
     }
 
-    //  Logs the error code for the suspended GoogleApiClient connection
     @Override
     public void onConnectionSuspended(int i) {
-        Log.w(">>>", "Connection suspended. Error code: " + i);
+        apiStatus.setText(R.string.connection_suspended);
     }
 
-    // Displays a Snackbar notifying the user that the connection to GoogleApiClient has failed
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        if (container != null) {
-            Snackbar.make(container, "Exception while connecting to Google Play services: " +
+        apiStatus.setText(R.string.connection_failed);
+        if (connectionResult.getErrorMessage() != null) {
+            Snackbar.make(baseLayout, getString(R.string.error) +
                             connectionResult.getErrorMessage(),
                     Snackbar.LENGTH_INDEFINITE).show();
         }
     }
-    // ---------------------------------------------------------------------------------------
-    // METHODS USED IN THE LOCATION PERMISSION WORKFLOW
+
+    // --------------------------------------------------------------------------------------------
+    // NEARBY MESSAGES SUBSCRIPTION
+
+    private void subscribe() {
+        // Subscribe to Bluetooh Low Energy only
+        SubscribeOptions options = new SubscribeOptions.Builder()
+                .setStrategy(Strategy.BLE_ONLY)
+                .build();
+
+        Nearby.Messages.subscribe(googleApiClient, messageListener, options)
+                // ResultCallback checks if the subscription succeeds
+                .setResultCallback(new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        subscribing = status.isSuccess();
+                        if (subscribing) {
+                            apiStatus.setText(R.string.scanning);
+                            displayNearbyIcon();
+                        } else {
+                            apiStatus.setText(R.string.scan_error);
+                            imgNearby.setVisibility(View.GONE);
+                            if (status.getStatusCode() == 7) {
+                                messagesHeader.setText(R.string.error_network_rationale);
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void unsubscribe() {
+        Nearby.Messages.unsubscribe(googleApiClient, messageListener);
+        subscribing = false;
+        imgNearby.setVisibility(View.GONE);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // FINE LOCATION PERMISSION WORKFLOW
+
     // Checks whether the app has permission to access fine location
     private boolean havePermission() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -198,14 +246,13 @@ public class MainActivity extends AppCompatActivity implements
     // Requests permission to access fine location
     private void requestPermission() {
         ActivityCompat.requestPermissions(this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, FINE_LOCATION_REQUEST_CODE);
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_CODE_FINE_LOCATION);
     }
 
     // Displays a Snackbar giving the user a chance to re-initiate the permission workflow
     private void showRequestPermissionSnackbar() {
-        if (container != null) {
-            Snackbar.make(container, R.string.permission_needed,
-                    Snackbar.LENGTH_INDEFINITE)
+        if (baseLayout != null) {
+            Snackbar.make(baseLayout, R.string.permission_needed, Snackbar.LENGTH_INDEFINITE)
                     .setAction(R.string.understood, new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -215,18 +262,12 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    // Displays a Snackbar with a link to Settings if permission was not granted
+    // Displays a Snackbar with a link to Settings if permission was denied
     private void showLinkToSettingsSnackbar() {
-        if (container == null) {
-            return;
-        }
-        Snackbar.make(container,
-                R.string.permission_settings,
-                Snackbar.LENGTH_INDEFINITE)
+        Snackbar.make(baseLayout, R.string.permission_settings, Snackbar.LENGTH_INDEFINITE)
                 .setAction(R.string.settings, new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // Build intent that displays the App settings screen.
                         Intent intent = new Intent();
                         intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                         Uri uri = Uri.fromParts("package",
@@ -242,15 +283,15 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        if (requestCode == FINE_LOCATION_REQUEST_CODE) {
+        if (requestCode == REQUEST_CODE_FINE_LOCATION) {
             for (int i = 0; i < permissions.length; i++) {
                 String permission = permissions[i];
                 if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
                     if (shouldShowRequestPermissionRationale(permission)) {
-                        // Access fine location permission denied
+                        // Access to fine location denied
                         showRequestPermissionSnackbar();
                     } else {
-                        // Access fine location permission denied, selected >Never ask again<
+                        // Access to fine location denied + Never ask again
                         showLinkToSettingsSnackbar();
                     }
                 } else {
@@ -261,48 +302,32 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    // ---------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------
+    // UTILITY METHODS
 
-    /**
-     * Calls {@link Messages#subscribe(GoogleApiClient, MessageListener, SubscribeOptions)},
-     * using a {@link Strategy} for BLE scanning. Attaches a {@link ResultCallback} to monitor
-     * whether the call to {@code subscribe()} succeeded or failed.
-     */
-    private void subscribe() {
-        // In this sample, we subscribe when the activity is launched, but not on device orientation
-        // change.
-        if (subscribed) {
-            Log.i(">>>", "Already subscribed.");
-            return;
+    private void displayNearbyIcon() {
+        Animation blinkAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.blink_anim);
+        imgNearby.setVisibility(View.VISIBLE);
+        imgNearby.startAnimation(blinkAnimation);
+    }
+
+    private void updateMessagesHeader() {
+        switch (messagesList.size()) {
+            case 0:
+                messagesHeader.setText(getResources().getString(R.string.found_zero));
+                return;
+            case 1:
+                messagesHeader.setText(getResources().getString(R.string.found_one));
+                return;
+            default:
+                messagesHeader.setText(getResources().getString(R.string.found_more,
+                        messagesList.size()));
         }
-
-        SubscribeOptions options = new SubscribeOptions.Builder()
-                .setStrategy(Strategy.BLE_ONLY)
-                .build();
-
-        Nearby.Messages.subscribe(googleApiClient, getPendingIntent(), options)
-                .setResultCallback(new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(@NonNull Status status) {
-                        if (status.isSuccess()) {
-                            Log.i(">>>", "Subscribed successfully.");
-                            startService(getBackgroundSubscribeServiceIntent());
-                        } else {
-                            Log.e(">>>", "Operation failed. Error: " +
-                                    NearbyMessagesStatusCodes.getStatusCodeString(
-                                            status.getStatusCode()));
-                        }
-                    }
-                });
     }
 
-    private PendingIntent getPendingIntent() {
-        return PendingIntent.getService(this, 0,
-                getBackgroundSubscribeServiceIntent(), PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    private Intent getBackgroundSubscribeServiceIntent() {
-        return new Intent(this, BackgroundSubscribeIntentService.class);
+    private static boolean isBluetoothAvailable() {
+        final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        return (bluetoothAdapter != null && bluetoothAdapter.isEnabled());
     }
 
 }

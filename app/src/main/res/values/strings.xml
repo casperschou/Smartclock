@@ -1,32 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- DIVERSE -->
     <string name="app_name">Smartclock</string>
-
-    <string name="settings">Indstillinger</string>
-
-    <string name="permission_needed">Adgang til placering er nødvendig for at kunne stemple ind.</string>
-
-    <string name="permission_settings">Gå til Indstillinger for at give adgang til placering.</string>
-
-    <string name="understood">Forstået</string>
-
-    <string name="scanning">Søger indstemplingsmuligheder&#8230;</string>
-
-    <string name="found_message">Fandt 1 indstemplingsmulighed</string>
-
-    <string name="found_messages">Fandt %1$d indstemplingsmuligheder</string>
-
-    <string name="wrong_credentials">Forkert brugernavn eller password</string>
-
-    <string name="username">Brugernavn</string>
-
-    <string name="password">Kodeord</string>
-
-    <string name="login">Log ind</string>
-
     <string name="filter">Filter</string>
-
     <string name="date_placeholder">Indtast dato</string>
+
+    <!-- ACCESS TO FINE LOCATION -->
+    <string name="permission_needed">Adgang til placering er nødvendig for at kunne stemple ind.</string>
+    <string name="permission_settings">Gå til Indstillinger for at give adgang til placering.</string>
+    <string name="understood">Forstået</string>
+    <string name="settings">Indstillinger</string>
+    <string name="permission_missing">Mangler adgang til placering</string>
+
+    <!-- CONNECTION TO GOOGLE API CLIENT -->
+    <string name="connecting">Opretter forbindelse&#8230;</string>
+    <string name="connected">Forbindelse oprettet</string>
+    <string name="connection_suspended">Forbindelse afbrudt</string>
+    <string name="connection_failed">Forbindelse fejlede</string>
+
+    <!-- SCAN FOR NEARBY MESSAGES -->
+    <string name="scanning">Søger steder i nærheden&#8230;</string>
+    <string name="scan_suspended">Søgning afbrudt</string>
+    <string name="scan_error">Søgning fejlede</string>
+    <string name="scan_result_lost">Mistede forbindelsen til:\n</string>
+    <string name="error">"Fejl: "</string>
+    <string name="error_bluetooth">Bluetooth er slået fra</string>
+    <string name="error_bluetooth_rationale">Slå venligst Bluetooth til, og genstart appen.\n
+        \nBluetooth er nødvendig for at kunne søge efter mulige indstemplingssteder i nærheden.
+    </string>
+        <string name="error_network_rationale">Der er ingen forbindelse til internettet.\n
+        \nInternetforbindelse er nødvendig for at kunne søge efter mulige indstemplingssteder i
+            nærheden.
+    </string>
+
+    <!-- NEARBY MESSAGES FOUND -->
+    <string name="found_zero">Ingen indstemplingsmulighed i nærheden</string>
+    <string name="found_one">Fandt 1 indstemplingsmulighed</string>
+    <string name="found_more">Fandt %1$d indstemplingsmuligheder</string>
+
+    <!-- HARDCODE LOGIN [USER: admin] [PASS: admin] -->
+    <string name="login">Log ind</string>
+    <string name="username">Brugernavn</string>
+    <string name="password">Kodeord</string>
+    <string name="wrong_credentials">Forkert brugernavn eller password</string>
 
 </resources>

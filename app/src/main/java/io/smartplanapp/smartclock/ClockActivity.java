@@ -1,13 +1,15 @@
 package io.smartplanapp.smartclock;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.ImageView;
+import android.widget.Toast;
 
-public class ClockActivity extends Activity {
+public class ClockActivity extends AppCompatActivity {
 
     private Chronometer chronometer;
     private ImageView imgButton;
@@ -17,6 +19,15 @@ public class ClockActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_clock);
+
+        // TODO: Få det her til at virke
+        String location = getIntent().getExtras().getString(MainActivity.EXTRA_LOCATION, "Nothing found");
+
+        Toast.makeText(this, "location", Toast.LENGTH_LONG).show();
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        toolbar.setTitle(location);
+        setSupportActionBar(toolbar);
 
         chronometer = (Chronometer) findViewById(R.id.chronometer);
 
