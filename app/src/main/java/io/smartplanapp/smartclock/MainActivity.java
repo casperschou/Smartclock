@@ -14,14 +14,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -47,8 +46,8 @@ public class MainActivity extends AppCompatActivity implements
     public static final String EXTRA_LOCATION = "location";
 
     // GUI elements
-    private FrameLayout baseLayout;
-    private ImageView imgNearby;
+    private LinearLayout baseLayout;
+    private ImageView imgStatus;
     private TextView apiStatus;
     private TextView messagesHeader;
 
@@ -56,8 +55,8 @@ public class MainActivity extends AppCompatActivity implements
     private static final int REQUEST_CODE_FINE_LOCATION = 123;
     private GoogleApiClient googleApiClient;
     private MessageListener messageListener;
-    private List<String> messagesList = new ArrayList<>();
-    private ArrayAdapter<String> messagesArrayAdapter;
+    private List<String> messages = new ArrayList<>();
+    private ArrayAdapter<String> adapter;
     private boolean subscribing;
 
     // --------------------------------------------------------------------------------------------
@@ -71,23 +70,22 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        baseLayout = (FrameLayout) findViewById(R.id.list_view_container);
-        imgNearby = (ImageView)findViewById(R.id.img_nearby);
-        imgNearby.setVisibility(View.GONE); // Display only when scanning for messages
+        baseLayout = (LinearLayout) findViewById(R.id.list_view_container);
+        imgStatus = (ImageView)findViewById(R.id.img_status);
         apiStatus = (TextView) findViewById(R.id.txt_api_status);
         messagesHeader = (TextView) findViewById(R.id.txt_msg_header);
 
         // ArrayAdapter and ListView for Nearby Messages
-        messagesArrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messagesList);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messages);
         final ListView messagesListView = (ListView) findViewById(R.id.list_view_messages);
-        messagesListView.setAdapter(messagesArrayAdapter);
+        messagesListView.setAdapter(adapter);
         messagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listView, View view,
                                     int position, long id) {
-//                Intent intent = new Intent(MainActivity.this, ClockActivity.class);
-//                intent.putExtra(EXTRA_LOCATION, listView.getItemAtPosition(position).toString());
-//                startActivity(intent);
+                Intent intent = new Intent(MainActivity.this, ClockActivity.class);
+                intent.putExtra(EXTRA_LOCATION, listView.getItemAtPosition(position).toString());
+                startActivity(intent);
                 Snackbar.make(baseLayout, listView.getItemAtPosition(position).toString(),
                         Snackbar.LENGTH_INDEFINITE).show();
             }
@@ -106,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         super.onStart();
-        messagesList.clear();
-        messagesArrayAdapter.notifyDataSetChanged();
+        messages.clear();
+        adapter.notifyDataSetChanged();
         messagesHeader.setText(R.string.found_zero);
     }
 
@@ -118,10 +116,12 @@ public class MainActivity extends AppCompatActivity implements
         if (!isBluetoothAvailable()) {
             apiStatus.setText(getString(R.string.error_bluetooth));
             messagesHeader.setText(R.string.error_bluetooth_rationale);
-            return;
-        }
-        if (havePermission()) {
-            buildGoogleApiClient();
+            imgStatus.setImageResource(R.drawable.ic_bluetooth_disabled_white_36dp);
+        } else {
+            imgStatus.setImageResource(R.drawable.ic_nearby);
+            if (havePermission()) {
+                buildGoogleApiClient();
+            }
         }
     }
 
@@ -146,16 +146,16 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onFound(Message message) {
                 String msgContent = new String(message.getContent());
-                messagesList.add(msgContent);
-                messagesArrayAdapter.notifyDataSetChanged();
+                messages.add(msgContent);
+                adapter.notifyDataSetChanged();
                 updateMessagesHeader();
             }
 
             @Override
             public void onLost(Message message) {
                 String msgContent = new String(message.getContent());
-                messagesList.remove(msgContent);
-                messagesArrayAdapter.notifyDataSetChanged();
+                messages.remove(msgContent);
+                adapter.notifyDataSetChanged();
                 updateMessagesHeader();
                 Snackbar.make(baseLayout, getString(R.string.scan_result_lost) + msgContent,
                         Snackbar.LENGTH_LONG).show();
@@ -219,9 +219,9 @@ public class MainActivity extends AppCompatActivity implements
                             displayNearbyIcon();
                         } else {
                             apiStatus.setText(R.string.scan_error);
-                            imgNearby.setVisibility(View.GONE);
                             if (status.getStatusCode() == 7) {
                                 messagesHeader.setText(R.string.error_network_rationale);
+                                imgStatus.setImageResource(R.drawable.ic_signal_wifi_off_white_36dp);
                             }
                         }
                     }
@@ -231,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements
     private void unsubscribe() {
         Nearby.Messages.unsubscribe(googleApiClient, messageListener);
         subscribing = false;
-        imgNearby.setVisibility(View.GONE);
+        imgStatus.setVisibility(View.INVISIBLE);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -307,12 +307,12 @@ public class MainActivity extends AppCompatActivity implements
 
     private void displayNearbyIcon() {
         Animation blinkAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.blink_anim);
-        imgNearby.setVisibility(View.VISIBLE);
-        imgNearby.startAnimation(blinkAnimation);
+        imgStatus.setVisibility(View.VISIBLE);
+        imgStatus.startAnimation(blinkAnimation);
     }
 
     private void updateMessagesHeader() {
-        switch (messagesList.size()) {
+        switch (messages.size()) {
             case 0:
                 messagesHeader.setText(getResources().getString(R.string.found_zero));
                 return;
@@ -321,7 +321,7 @@ public class MainActivity extends AppCompatActivity implements
                 return;
             default:
                 messagesHeader.setText(getResources().getString(R.string.found_more,
-                        messagesList.size()));
+                        messages.size()));
         }
     }
 

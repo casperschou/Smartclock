@@ -22,7 +22,7 @@
             android:value="AIzaSyBFtrH3uy2RPn49KBMeom2LpbZJ1tQ_RoA" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ShiftsLogActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="orientation|screenSize">
@@ -36,7 +36,7 @@
         <activity android:name=".ClockActivity" />
         <activity android:name=".LoginActivity"
             android:windowSoftInputMode="stateVisible" />
-        <activity android:name=".ShiftsLogActivity"></activity>
+        <activity android:name=".MainActivity" />
     </application>
 
 </manifest>

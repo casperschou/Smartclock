@@ -2,6 +2,10 @@
 <resources>
     <color name="colorPrimary">#229BD8</color>
     <color name="colorPrimaryDark">#17232E</color>
-    <color name="colorAccent">#229BD8</color>
-    <color name="colorBackground">#EEEEEE</color>
+    <color name="colorAccent">#FA8E2A</color>
+    <color name="colorNearby">#498AF4</color>
+    <color name="colorBackground">#DDDDDD</color>
+    <color name="colorButtonIn">#59B359</color>
+    <color name="colorButtonOut">#D54A44</color>
+
 </resources>

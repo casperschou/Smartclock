@@ -45,4 +45,14 @@
     <string name="password">Kodeord</string>
     <string name="wrong_credentials">Forkert brugernavn eller password</string>
 
+    <!-- CLOCK PUNCH IN / OUT -->
+    <string name="punch_in">Stempel ind</string>
+    <string name="punch_out">Stempel ud</string>
+    <string name="punch_in_time_label">Tid for indstempling:</string>
+    <string name="punch_out_time_label">Tid for udstempling:</string>
+    <string name="punched_total_time">Arbejdstid: </string>
+    <string name="hours_and_minutes">%1$d timer %2$d minutter</string>
+    <string name="exit">Afslut</string>
+    <string name="previous_shifts">Tidligere vagter</string>
+
 </resources>

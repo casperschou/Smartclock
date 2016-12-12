@@ -1,78 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/colorPrimary"
+    android:background="@color/colorBackground"
     tools:context="io.smartplanapp.smartclock.ClockActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </android.support.design.widget.AppBarLayout>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingTop="20dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Onsdag"/>
+        android:orientation="vertical"
+        android:paddingTop="@dimen/activity_margin_double"
+        android:paddingBottom="@dimen/activity_margin_double"
+        android:paddingLeft="@dimen/activity_margin"
+        android:paddingRight="@dimen/activity_margin"
+        android:background="@color/colorPrimaryDark">
 
         <TextClock
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
-            android:textColor="@android:color/white"
-            android:textSize="32sp"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/colorPrimary"
+            style="@style/txtShadow"
+            android:textSize="@dimen/textsize_largest"
+            android:textStyle="bold"
+            android:textAllCaps="true"
+            android:format24Hour="EEEE"
+            android:id="@+id/clock_weekday"/>
+
+        <TextClock
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/colorPrimary"
+            style="@style/txtShadow"
+            android:textSize="@dimen/textsize_medium"
             android:format24Hour="dd. MMMM yyyy"
-            android:layout_weight="1"
             android:id="@+id/clock_date"/>
 
         <TextClock
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimaryDark"
-            android:textColor="@android:color/white"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@color/colorPrimary"
             style="@style/txtShadow"
-            android:format24Hour="HH:mm:ss"
-            android:textSize="50sp"
+            android:textSize="@dimen/textsize_largest"
             android:textStyle="bold"
+            android:format24Hour="HH:mm:ss"
             android:id="@+id/clock_time" />
 
     </LinearLayout>
 
-    <Chronometer
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="142dp"
-        android:textSize="40sp"
-        android:textStyle="bold"
+    <Button
+        android:id="@+id/btn_punch"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:text="@string/punch_in"
         android:textColor="@android:color/white"
-        android:id="@+id/chronometer" />
+        style="@style/txtShadow"
+        android:textSize="@dimen/textsize_large"
+        android:textStyle="bold"
+        android:background="@color/colorButtonIn"/>
 
-    <ImageView
-        android:layout_width="140dp"
-        android:layout_height="140dp"
-        android:layout_below="@+id/chronometer"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="100dp"
-        android:src="@drawable/button_up"
-        android:id="@+id/imgButton" />
+    <!-- TIME IN -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/activity_margin_double"
+        android:paddingBottom="@dimen/activity_margin_half"
+        android:paddingLeft="@dimen/activity_margin"
+        android:paddingRight="@dimen/activity_margin">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="@string/punch_in_time_label"
+            android:textSize="@dimen/textsize_small"
+            android:labelFor="@+id/txt_time_in"
+            android:id="@+id/txt_time_in_label" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:textSize="@dimen/textsize_default"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            style="@style/txtShadow"
+            android:visibility="invisible"
+            android:id="@+id/txt_time_in" />
+
+    </RelativeLayout>
+
+    <!-- TIME OUT -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/activity_margin"
+        android:paddingBottom="@dimen/activity_margin_half"
+        android:paddingLeft="@dimen/activity_margin"
+        android:paddingRight="@dimen/activity_margin">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="@string/punch_out_time_label"
+            android:textSize="@dimen/textsize_small"
+            android:labelFor="@+id/txt_time_out"
+            android:id="@+id/txt_time_out_label" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:textSize="@dimen/textsize_default"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            style="@style/txtShadow"
+            android:visibility="invisible"
+            android:id="@+id/txt_time_out" />
+
+    </RelativeLayout>
+
+    <!-- TOTAL TIME -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/activity_margin"
+        android:paddingLeft="@dimen/activity_margin"
+        android:paddingRight="@dimen/activity_margin">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="@string/punched_total_time"
+            android:textSize="@dimen/textsize_small"
+            android:labelFor="@+id/txt_total_time"
+            android:id="@+id/txt_total_time_label" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:textSize="@dimen/textsize_default"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            style="@style/txtShadow"
+            android:visibility="invisible"
+            android:id="@+id/txt_total_time" />
+
+    </RelativeLayout>
 
 </LinearLayout>

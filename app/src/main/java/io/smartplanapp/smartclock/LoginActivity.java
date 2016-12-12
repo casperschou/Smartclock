@@ -3,17 +3,12 @@ package io.smartplanapp.smartclock;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-
-import static android.os.Build.VERSION_CODES.M;
-import static io.smartplanapp.smartclock.R.id.btnLogin;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -26,10 +21,10 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        txtUsername = (EditText) findViewById(R.id.txtUsername);
-        txtPassword = (EditText) findViewById(R.id.txtPassword);
+        txtUsername = (EditText) findViewById(R.id.txt_username);
+        txtPassword = (EditText) findViewById(R.id.txt_password);
         container = (RelativeLayout) findViewById(R.id.login_activity_container);
-        Button btnLogin = (Button) findViewById(R.id.btnLogin);
+        Button btnLogin = (Button) findViewById(R.id.btn_login);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
