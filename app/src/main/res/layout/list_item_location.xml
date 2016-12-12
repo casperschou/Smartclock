@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/activity_margin"
+    android:background="@color/colorBackground">
+
+    <Button
+        android:id="@+id/btn_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/card_padding_double"
+        android:paddingBottom="@dimen/card_padding_double"
+        android:layout_marginBottom="@dimen/activity_margin"
+        android:text="@string/punch_in"
+        android:textColor="@android:color/white"
+        style="@style/txtShadow"
+        android:textSize="@dimen/textsize_medium"
+        android:textStyle="bold"
+        android:background="@color/colorAccent"/>
+
+</LinearLayout>

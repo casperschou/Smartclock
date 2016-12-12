@@ -37,21 +37,11 @@ public class ShiftsDatabase {
         return this;
     }
 
-    public void close() {
-        if (dbOpenHelper != null) {
-            dbOpenHelper.close();
-        }
-    }
-
     public long createShift(String begin, String end) {
         ContentValues values = new ContentValues();
         values.put(KEY_BEGIN, begin);
         values.put(KEY_END, end);
         return db.insert(TABLE_NAME, null, values);
-    }
-
-    public int deleteShift(long id) {
-        return db.delete(TABLE_NAME, ID_EQUAL, stringArray(id));
     }
 
     public int deleteAllShifts() {
@@ -62,31 +52,13 @@ public class ShiftsDatabase {
         return db.query(TABLE_NAME, new String[] {KEY_ID, KEY_BEGIN, KEY_END}, null, null, null, null, null);
     }
 
-    public Cursor getShiftsByDate(String inputText) throws SQLException {
-        Cursor mCursor = null;
-        if (inputText == null  ||  inputText.length() == 0) {
-            mCursor = db.query(TABLE_NAME, new String[]{KEY_ID,
-                            KEY_BEGIN, KEY_END},
-                    null, null, null, null, null);
-        } else {
-            mCursor = db.query(true, TABLE_NAME, new String[] {KEY_ID,
-                            KEY_BEGIN, KEY_END},
-                    KEY_END + " like '%" + inputText + "%'", null,
-                    null, null, null, null);
-        }
-        if (mCursor != null) {
-            mCursor.moveToFirst();
-        }
-        return mCursor;
-    }
-
     public Cursor getAllShifts() {
-        Cursor mCursor = db.query(TABLE_NAME, ALL_COLUMNS,
+        Cursor cursor = db.query(TABLE_NAME, ALL_COLUMNS,
                 null, null, null, null, null);
-        if (mCursor != null) {
-            mCursor.moveToFirst();
+        if (cursor != null) {
+            cursor.moveToFirst();
         }
-        return mCursor;
+        return cursor;
     }
 
     public List<Shift> getAllShiftsList() {
@@ -113,11 +85,12 @@ public class ShiftsDatabase {
     }
 
     public void insertSampleShifts() {
-        createShift("mandag", "tirsdag");
-        createShift("onsdag", "torsdag");
-        createShift("fredag", "lørdag");
+        createShift("1475819640", "1475848860");
+        createShift("1477036680", "1477071300");
+        createShift("1477593900", "1477610040");
+        createShift("1478607660", "1478638740");
+        createShift("1478759400", "1478798820");
     }
-
 
     private static class DatabaseOpenHelper extends SQLiteOpenHelper {
 

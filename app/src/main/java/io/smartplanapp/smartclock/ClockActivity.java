@@ -1,5 +1,6 @@
 package io.smartplanapp.smartclock;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -64,7 +65,7 @@ public class ClockActivity extends AppCompatActivity {
                 txtTimeEnd.setVisibility(View.VISIBLE);
                 // Calculate total work time
                 timeTotal = timeEnd-timeBegin;
-                txtTotalTime.setText(millisToHoursAndMinutes(timeTotal));
+                txtTotalTime.setText(millisToHoursAndMinutes(this, timeTotal));
                 txtTotalTime.setVisibility(View.VISIBLE);
                 toggleStatus++;
                 return;
@@ -75,25 +76,17 @@ public class ClockActivity extends AppCompatActivity {
         }
     }
 
-
     private String millisToTimestamp(Long millis) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", getLocale());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
         return simpleDateFormat.format(new Date(millis));
     }
 
-    private String millisToHoursAndMinutes(Long millis) {
-        return String.format(getResources().getString(R.string.hours_and_minutes),
+    private String millisToHoursAndMinutes(Context ctx, Long millis) {
+        Context context = ctx;
+        return String.format(context.getString(R.string.hours_and_minutes),
                 TimeUnit.MILLISECONDS.toHours(millis),
                 TimeUnit.MILLISECONDS.toMinutes(millis) -
                         TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)));
-    }
-
-    private Locale getLocale(){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
-            return getResources().getConfiguration().getLocales().get(0);
-        } else{
-            return getResources().getConfiguration().locale;
-        }
     }
 
 }

@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="@dimen/activity_margin_double"
-        android:paddingBottom="@dimen/activity_margin_double"
+        android:paddingTop="@dimen/card_padding_double"
+        android:paddingBottom="@dimen/card_padding_double"
         android:paddingLeft="@dimen/activity_margin"
         android:paddingRight="@dimen/activity_margin"
         android:background="@color/colorPrimaryDark">
@@ -55,7 +55,9 @@
     <Button
         android:id="@+id/btn_punch"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/card_padding_double"
+        android:paddingBottom="@dimen/card_padding_double"
         android:text="@string/punch_in"
         android:textColor="@android:color/white"
         style="@style/txtShadow"
@@ -67,8 +69,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="@dimen/activity_margin_double"
-        android:paddingBottom="@dimen/activity_margin_half"
+        android:paddingTop="@dimen/card_padding_double"
+        android:paddingBottom="@dimen/card_padding_half"
         android:paddingLeft="@dimen/activity_margin"
         android:paddingRight="@dimen/activity_margin">
 
@@ -99,7 +101,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="@dimen/activity_margin"
-        android:paddingBottom="@dimen/activity_margin_half"
+        android:paddingBottom="@dimen/card_padding_half"
         android:paddingLeft="@dimen/activity_margin"
         android:paddingRight="@dimen/activity_margin">
 

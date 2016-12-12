@@ -30,7 +30,7 @@ public class Shift {
     }
 
     public String toString() {
-        return "From " + begin + " to " + end;
+        return begin + " " + end;
     }
 
 }

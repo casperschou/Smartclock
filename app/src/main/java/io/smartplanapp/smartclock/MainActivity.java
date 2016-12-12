@@ -19,6 +19,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -39,6 +40,8 @@ import com.google.android.gms.nearby.messages.SubscribeOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.smartplanapp.smartclock.util.LocationAdapter;
+
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements
     private GoogleApiClient googleApiClient;
     private MessageListener messageListener;
     private List<String> messages = new ArrayList<>();
-    private ArrayAdapter<String> adapter;
+    private LocationAdapter adapter;
     private boolean subscribing;
 
     // --------------------------------------------------------------------------------------------
@@ -76,9 +79,10 @@ public class MainActivity extends AppCompatActivity implements
         messagesHeader = (TextView) findViewById(R.id.txt_msg_header);
 
         // ArrayAdapter and ListView for Nearby Messages
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, messages);
+        adapter = new LocationAdapter(this, messages);
         final ListView messagesListView = (ListView) findViewById(R.id.list_view_messages);
         messagesListView.setAdapter(adapter);
+
         messagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listView, View view,
@@ -147,6 +151,11 @@ public class MainActivity extends AppCompatActivity implements
             public void onFound(Message message) {
                 String msgContent = new String(message.getContent());
                 messages.add(msgContent);
+                messages.add("Test 1");
+                messages.add("Test 2");
+                messages.add("Test 3");
+                messages.add("Test 4");
+                messages.add("Test 5");
                 adapter.notifyDataSetChanged();
                 updateMessagesHeader();
             }
