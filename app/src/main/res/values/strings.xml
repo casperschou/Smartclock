@@ -35,9 +35,14 @@
     </string>
 
     <!-- NEARBY MESSAGES FOUND -->
-    <string name="found_zero">Ingen indstemplingsmulighed i nærheden</string>
-    <string name="found_one">Fandt 1 indstemplingsmulighed</string>
-    <string name="found_more">Fandt %1$d indstemplingsmuligheder</string>
+    <string name="found_zero_messages">Ingen indstemplingsmulighed i nærheden</string>
+    <string name="found_one_message">Fandt 1 indstemplingsmulighed</string>
+    <string name="found_more_messages">Fandt %1$d indstemplingsmuligheder</string>
+
+    <!-- SHIFTS FOUND -->
+    <string name="found_zero_shifts">Ingen tidligere vagter</string>
+    <string name="found_one_shift">Fandt 1 tidligere vagt</string>
+    <string name="found_more_shifts">Fandt %1$d tidligere vagter</string>
 
     <!-- HARDCODE LOGIN [USER: admin] [PASS: admin] -->
     <string name="login">Log ind</string>
@@ -46,13 +51,17 @@
     <string name="wrong_credentials">Forkert brugernavn eller password</string>
 
     <!-- CLOCK PUNCH IN / OUT -->
-    <string name="punch_in">Stempel ind</string>
     <string name="punch_out">Stempel ud</string>
     <string name="punch_in_time_label">Tid for indstempling:</string>
     <string name="punch_out_time_label">Tid for udstempling:</string>
     <string name="punched_total_time">Arbejdstid: </string>
     <string name="hours_and_minutes">%1$d timer %2$d minutter</string>
-    <string name="exit">Afslut</string>
     <string name="previous_shifts">Tidligere vagter</string>
+    <string name="punch_in_dialogue">Vil du stemple ind her?\n</string>
+    <string name="yes">Ja</string>
+    <string name="cancel">Annuller</string>
+    <string name="saved">Gemt</string>
+    <string name="time_in">Ind kl:</string>
+    <string name="time_out">Ud kl:</string>
 
 </resources>

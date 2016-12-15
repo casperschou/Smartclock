@@ -1,7 +1,9 @@
 package io.smartplanapp.smartclock.util;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +13,9 @@ import android.widget.Button;
 import java.util.List;
 
 import io.smartplanapp.smartclock.ClockActivity;
-import io.smartplanapp.smartclock.MainActivity;
 import io.smartplanapp.smartclock.R;
 
-import static io.smartplanapp.smartclock.MainActivity.EXTRA_LOCATION;
+import static io.smartplanapp.smartclock.LocationActivity.EXTRA_LOCATION;
 
 public class LocationAdapter extends ArrayAdapter<String> {
 
@@ -42,9 +43,26 @@ public class LocationAdapter extends ArrayAdapter<String> {
         viewHolder.btnLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getContext(), ClockActivity.class);
-                intent.putExtra(EXTRA_LOCATION, location);
-                getContext().startActivity(intent);
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                Intent intent = new Intent(getContext(), ClockActivity.class);
+                                intent.putExtra(EXTRA_LOCATION, location);
+                                getContext().startActivity(intent);
+                                break;
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                break;
+                        }
+                    }
+                };
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setMessage("Vil du stemple ind her?\n" + location)
+                        .setPositiveButton(R.string.yes, dialogClickListener)
+                        .setNegativeButton(R.string.cancel, dialogClickListener)
+                        .show();
+
             }
         });
 

@@ -17,9 +17,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -42,7 +39,7 @@ import java.util.List;
 
 import io.smartplanapp.smartclock.util.LocationAdapter;
 
-public class MainActivity extends AppCompatActivity implements
+public class LocationActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
@@ -68,40 +65,38 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_location);
 
-        // Initialize GUI elements
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        baseLayout = (LinearLayout) findViewById(R.id.list_view_container);
-        imgStatus = (ImageView)findViewById(R.id.img_status);
-        apiStatus = (TextView) findViewById(R.id.txt_api_status);
-        messagesHeader = (TextView) findViewById(R.id.txt_msg_header);
+        // Check for login. Initial value is false
+        boolean isLoggedIn = getSharedPreferences("Prefs", 0).getBoolean("isLoggedIn", false);
 
-        // ArrayAdapter and ListView for Nearby Messages
-        adapter = new LocationAdapter(this, messages);
-        final ListView messagesListView = (ListView) findViewById(R.id.list_view_messages);
-        messagesListView.setAdapter(adapter);
+        // If user was not logget in, open LoginActivity
+        if (!isLoggedIn) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+        } else {
 
-        messagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> listView, View view,
-                                    int position, long id) {
-                Intent intent = new Intent(MainActivity.this, ClockActivity.class);
-                intent.putExtra(EXTRA_LOCATION, listView.getItemAtPosition(position).toString());
-                startActivity(intent);
-                Snackbar.make(baseLayout, listView.getItemAtPosition(position).toString(),
-                        Snackbar.LENGTH_INDEFINITE).show();
+            // Initialize GUI elements
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_location);
+            setSupportActionBar(toolbar);
+            baseLayout = (LinearLayout) findViewById(R.id.list_view_container);
+            imgStatus = (ImageView) findViewById(R.id.img_status);
+            apiStatus = (TextView) findViewById(R.id.txt_api_status);
+            messagesHeader = (TextView) findViewById(R.id.txt_msg_header);
+
+            // ArrayAdapter and ListView for Nearby Messages
+            adapter = new LocationAdapter(this, messages);
+            final ListView messagesListView = (ListView) findViewById(R.id.list_view_messages);
+            messagesListView.setAdapter(adapter);
+
+            // Permission to access fine location
+            if (!havePermission()) {
+                apiStatus.setText(R.string.permission_missing);
+                requestPermission();
             }
-        });
 
-        // Permission to access fine location
-        if (!havePermission()) {
-            apiStatus.setText(R.string.permission_missing);
-            requestPermission();
+            initMessageListener();
         }
-
-        initMessageListener();
     }
 
     // Reset list of message results, so locations can not be used outside of range
@@ -110,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onStart();
         messages.clear();
         adapter.notifyDataSetChanged();
-        messagesHeader.setText(R.string.found_zero);
+        messagesHeader.setText(R.string.found_zero_messages);
     }
 
     // Check if Bluetooth or fine location access have been disabled
@@ -129,8 +124,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-
-
     // Unsubscribe with every pause, since active foreground scanning is battery consuming
     @Override
     protected void onPause() {
@@ -141,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onPause();
     }
 
-    // --------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------
     // MESSAGE LISTENER FOR NEARBY MESSAGES
 
     private void initMessageListener() {
@@ -151,11 +144,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onFound(Message message) {
                 String msgContent = new String(message.getContent());
                 messages.add(msgContent);
-                messages.add("Test 1");
-                messages.add("Test 2");
-                messages.add("Test 3");
-                messages.add("Test 4");
-                messages.add("Test 5");
+                messages.add("Smartplan"); // Sample to show 2 messages (Only 1 from Beacon)
                 adapter.notifyDataSetChanged();
                 updateMessagesHeader();
             }
@@ -315,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements
     // UTILITY METHODS
 
     private void displayNearbyIcon() {
-        Animation blinkAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.blink_anim);
+        Animation blinkAnimation = AnimationUtils.loadAnimation(LocationActivity.this, R.anim.blink_anim);
         imgStatus.setVisibility(View.VISIBLE);
         imgStatus.startAnimation(blinkAnimation);
     }
@@ -323,13 +312,13 @@ public class MainActivity extends AppCompatActivity implements
     private void updateMessagesHeader() {
         switch (messages.size()) {
             case 0:
-                messagesHeader.setText(getResources().getString(R.string.found_zero));
+                messagesHeader.setText(getResources().getString(R.string.found_zero_messages));
                 return;
             case 1:
-                messagesHeader.setText(getResources().getString(R.string.found_one));
+                messagesHeader.setText(getResources().getString(R.string.found_one_message));
                 return;
             default:
-                messagesHeader.setText(getResources().getString(R.string.found_more,
+                messagesHeader.setText(getResources().getString(R.string.found_more_messages,
                         messages.size()));
         }
     }

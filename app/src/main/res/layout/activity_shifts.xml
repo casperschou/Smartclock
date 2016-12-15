@@ -5,8 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="io.smartplanapp.smartclock.MainActivity"
-    android:background="@color/colorBackground">
+    android:background="@color/colorBackground"
+    tools:context="io.smartplanapp.smartclock.ShiftsActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -14,7 +14,7 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbar_shifts"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
@@ -22,29 +22,20 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <LinearLayout
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/card_padding_double"
+        android:paddingBottom="@dimen/card_padding_double"
+        android:paddingLeft="@dimen/activity_margin"
+        android:paddingRight="@dimen/activity_margin"
+        android:textSize="@dimen/textsize_small"
+        android:id="@+id/txt_log_header" />
+
+    <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="@dimen/activity_margin"
-        android:background="@color/colorPrimaryDark">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="@dimen/icon_dimension"
-            android:gravity="center_vertical"
-            android:textColor="@color/colorPrimary"
-            android:textSize="@dimen/textsize_default"
-            android:layout_weight="1"
-            android:id="@+id/txt_api_status" />
-
-        <ImageView
-            android:layout_width="@dimen/icon_dimension"
-            android:layout_height="@dimen/icon_dimension"
-            android:id="@+id/img_status" />
-
-    </LinearLayout>
-
-    <include layout="@layout/list_messages" />
+        android:id="@+id/list_view_shifts">
+    </ListView>
 
 </LinearLayout>

@@ -13,7 +13,6 @@
         android:paddingTop="@dimen/card_padding_double"
         android:paddingBottom="@dimen/card_padding_double"
         android:layout_marginBottom="@dimen/activity_margin"
-        android:text="@string/punch_in"
         android:textColor="@android:color/white"
         style="@style/txtShadow"
         android:textSize="@dimen/textsize_medium"
